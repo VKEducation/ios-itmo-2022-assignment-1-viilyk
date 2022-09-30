@@ -29,6 +29,10 @@ class Expression<Number: Numeric & LosslessStringConvertible> {
     func toString() throws -> String {
         throw ParserError.DevelopeError(message: "toString must be overwrited")
     }
+
+    func simplify() throws -> Expression<Number> {
+        throw ParserError.DevelopeError(message: "simplify must be overwrited")
+    }
 }
 
 class Const <Number: Numeric & LosslessStringConvertible>: Expression<Number> {
@@ -45,6 +49,10 @@ class Const <Number: Numeric & LosslessStringConvertible>: Expression<Number> {
     override func toString() throws -> String {
         return String(n)
     }
+    
+    override func simplify() throws -> Expression<Number> {
+        return self
+    }
 }
 
 class Negate <Number: Numeric & LosslessStringConvertible>: Expression<Number> {
@@ -60,6 +68,10 @@ class Negate <Number: Numeric & LosslessStringConvertible>: Expression<Number> {
     
     override func toString() throws -> String {
         return "-(\(try expr.toString()))"
+    }
+    
+    override func simplify() throws -> Expression<Number> {
+        return BinaryExpression(Const(-1), try expr.simplify(), Operator<Number>(precedence: 9223372036854775807, associativity: .left, function: *), "*")
     }
 }
 
@@ -84,6 +96,9 @@ class BinaryExpression<Number: Numeric & LosslessStringConvertible>: Expression<
         return "(\(try lhs.toString()) \(sign) \(try rhs.toString()))"
     }
 
+    override func simplify() throws -> Expression<Number> {
+        return BinaryExpression(try lhs.simplify(), try rhs.simplify(), operation, sign)
+    }
 }
 
 
