@@ -97,6 +97,12 @@ class BinaryExpression<Number: Numeric & LosslessStringConvertible>: Expression<
     }
 
     override func simplify() throws -> Expression<Number> {
+        if (self.sign == "+") && (self.rhs is Negate) {
+            return BinaryExpression(try self.lhs.simplify(), try (self.rhs as! Negate<Number>).expr.simplify(), Operator<Number>(precedence: self.operation.precedence, associativity: self.operation.associativity, function: -), "-")
+        }
+        if (self.sign == "-") && (self.rhs is Negate) {
+            return BinaryExpression(try self.lhs.simplify(), try (self.rhs as! Negate<Number>).expr.simplify(), Operator<Number>(precedence: self.operation.precedence, associativity: self.operation.associativity, function: +), "+")
+        }
         return BinaryExpression(try lhs.simplify(), try rhs.simplify(), operation, sign)
     }
 }
